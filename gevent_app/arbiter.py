@@ -109,7 +109,7 @@ class InstanceRunner(object):
     def run(self):
         """Main-loop of the instance runner."""
         self.init_process()
-        #self.log.info("Booting child with pid: %d", os.getpid())
+        self.log.info("Booting child with pid: %d", os.getpid())
 
         self.app.start()
         self.booted = True
@@ -121,9 +121,6 @@ class InstanceRunner(object):
                 break
             self.tmp.notify()
             self.shutdown.wait(1)
-
-        self.log.info("STOP")
-        # FIXME: check if parent died.
 
         self.app.stop()
 
