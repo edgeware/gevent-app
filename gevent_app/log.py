@@ -27,6 +27,14 @@ import multiprocessing, threading, logging, sys, traceback
 FORMAT_STRING = '%(asctime)s pid-%(process)-6d %(levelname)-6s [%(name)s] %(message)s'
 DATE_FORMAT = "%Y-%m-%d %H:%M:%S%z"
 
+
+def patch_logging():
+    """Patch the logging module so that it does not use threads."""
+    logging.threading = None
+    logging.thread = None
+    logging._lock = None
+    logging.logThreads = False
+
  
 class StreamToLogger(object):
     """Fake file-like stream object that redirects writes to a logger

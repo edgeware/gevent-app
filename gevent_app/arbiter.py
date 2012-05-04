@@ -222,7 +222,6 @@ class BaseArbiter(object):
         self.pid = os.getpid()
         self.init_signals()
         self.init_log()
-        self.capture_stdout()
         log.debug("Arbiter %s booted on %d", self.name, self.pid)
 
     def init_signals(self):
@@ -289,7 +288,7 @@ class BaseArbiter(object):
 
         """
         log.info("Hang up: %s", self.name)
-        #self.reload()
+        self.init_log()
         
     def handle_quit(self):
         """Quit."""
