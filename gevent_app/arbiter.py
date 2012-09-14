@@ -127,6 +127,13 @@ class InstanceRunner(object):
     def update_proc_title(self):
         util._setproctitle('worker %s: %s' % (self.name, str(self.app),))
 
+    def capture_stdout(self):
+        """Setup so that stdout and stderr are sent to a logger."""
+        sys.stdout = StreamToLogger(logging.getLogger(
+                'sys.stdout'), logging.INFO)
+        sys.stderr = StreamToLogger(logging.getLogger(
+                'sys.stderr'), logging.ERROR)
+
     def init_process(self):
         """Initialize process."""
         random.seed() # FIXME: seed with pid?
@@ -136,6 +143,7 @@ class InstanceRunner(object):
         for handler in logger.handlers:
             if not isinstance(handler, ChildLogHandler):
                 logger.removeHandler(handler)
+        self.capture_stdout()
         # Initialize the rest.
         util.set_owner_process(self.uid, self.gid)
         util.close_on_exec(self.tmp.fileno())
