@@ -145,7 +145,6 @@ class InstanceRunner(object):
                 logger.removeHandler(handler)
         self.capture_stdout()
         # Initialize the rest.
-        util.set_owner_process(self.uid, self.gid)
         util.close_on_exec(self.tmp.fileno())
         self.init_signals()
 
