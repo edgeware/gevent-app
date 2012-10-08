@@ -44,7 +44,7 @@ class HaltServer(Exception):
     def __init__(self, reason, exit_status=1):
         self.reason = reason
         self.exit_status = exit_status
-    
+
     def __str__(self):
         return "<HaltServer %r %d>" % (self.reason, self.exit_status)
 
@@ -72,7 +72,7 @@ class NotifyFile(object):
 
         self.spinner = 0
 
-    def notify(self): 
+    def notify(self):
         try:
             self.spinner = (self.spinner+1) % 2
             os.fchmod(self._tmp.fileno(), self.spinner)
@@ -83,7 +83,7 @@ class NotifyFile(object):
 
     def fileno(self):
         return self._tmp.fileno()
-       
+
     def close(self):
         return self._tmp.close()
 
@@ -145,7 +145,6 @@ class InstanceRunner(object):
                 logger.removeHandler(handler)
         self.capture_stdout()
         # Initialize the rest.
-        util.set_owner_process(self.uid, self.gid)
         util.close_on_exec(self.tmp.fileno())
         self.init_signals()
 
@@ -154,7 +153,7 @@ class InstanceRunner(object):
         gevent.signal(signal.SIGQUIT, self.handle_quit)
         gevent.signal(signal.SIGTERM, self.handle_exit)
         gevent.signal(signal.SIGWINCH, self.handle_winch)
-            
+
     def handle_quit(self):
         self.log.info('Received quit')
         self.shutdown.set()
@@ -162,7 +161,7 @@ class InstanceRunner(object):
     def handle_exit(self):
         self.log.info('Received exit')
         sys.exit(0)
-        
+
     def handle_winch(self):
         # Ignore SIGWINCH in worker. Fixes a crash on OpenBSD.
         return
@@ -183,7 +182,7 @@ class BaseArbiter(object):
     )
 
     formatter = logging.Formatter(FORMAT_STRING, DATE_FORMAT)
-    
+
     def __init__(self, app, name=None, logfile=None, timeout=30,
                  uid=None, gid=None):
         self.app = app
@@ -227,6 +226,7 @@ class BaseArbiter(object):
 
     def init_process(self):
         """Initialize the arbiter process."""
+        util.set_owner_process(self.uid, self.gid)
         self.pid = os.getpid()
         self.init_signals()
         self.init_log()
@@ -264,7 +264,7 @@ class BaseArbiter(object):
                 if signame is None:
                     log.info("Ignoring unknown signal: %s", sig)
                     continue
-                
+
                 handler = getattr(self, "handle_%s" % signame, None)
                 if not handler:
                     log.error("Unhandled signal: %s", signame)
@@ -282,7 +282,7 @@ class BaseArbiter(object):
             except SystemExit:
                 raise
             except Exception:
-                log.info("Unhandled exception in main loop:\n%s",  
+                log.info("Unhandled exception in main loop:\n%s",
                             traceback.format_exc())
                 self.stop(False)
                 sys.exit(-1)
@@ -297,15 +297,15 @@ class BaseArbiter(object):
         """
         log.info("Hang up: %s", self.name)
         self.init_log()
-        
+
     def handle_quit(self):
         """Quit."""
         raise StopIteration
-    
+
     def handle_int(self):
         """Interrupt."""
         raise StopIteration
-    
+
     def handle_term(self):
         """Terminate."""
         self.stop(True)
@@ -319,7 +319,7 @@ class BaseArbiter(object):
             self.kill_children(signal.SIGQUIT)
         else:
             log.info("SIGWINCH ignored. Not daemonized")
-    
+
     def halt(self, reason=None, exit_status=0):
         """Halt arbiter."""
         log.info("Shutting down: %s", self.name)
@@ -328,10 +328,10 @@ class BaseArbiter(object):
         self.stop()
         log.info("See you next")
         sys.exit(exit_status)
-        
+
     def stop(self, graceful=True):
         """Stop children.
-        
+
         @param graceful: If True children will be killed gracefully
             (ie. trying to wait for the current connection)
         """
@@ -344,7 +344,7 @@ class BaseArbiter(object):
                 break
             gevent.sleep(0.1)
             self.reap_children()
-        self.kill_children(signal.SIGKILL)   
+        self.kill_children(signal.SIGKILL)
         self.stopping = False
 
     def murder_children(self):
@@ -363,7 +363,7 @@ class BaseArbiter(object):
 
             log.critical("WORKER TIMEOUT (pid:%s)", pid)
             self.kill_worker(pid, signal.SIGKILL)
-        
+
     def reap_children(self):
         """Reap children to avoid zombie processes."""
         try:
@@ -371,7 +371,7 @@ class BaseArbiter(object):
                 wpid, status = os.waitpid(-1, os.WNOHANG)
                 if not wpid:
                     break
-                
+
                 # A worker said it cannot boot. We'll shutdown
                 # to avoid infinite start/stop cycles.
                 exitcode = status >> 8
@@ -388,7 +388,7 @@ class BaseArbiter(object):
         except OSError, e:
             if e.errno == errno.ECHILD:
                 pass
-    
+
     def manage_children(self):
         """Maintain the number of children by spawning or killing as
         required.
@@ -401,7 +401,7 @@ class BaseArbiter(object):
                ppid=self.pid, timeout=self.timeout, name=self.name,
                uid=self.uid, gid=self.gid)
         except:
-            log.info("Unhandled exception while creating '%s':\n%s",  
+            log.info("Unhandled exception while creating '%s':\n%s",
                             self.name, traceback.format_exc())
             return
 
@@ -431,11 +431,11 @@ class BaseArbiter(object):
 
     def spawn_children(self):
         """Spawn new children as needed.
-        
+
         This is where a worker process leaves the main loop
         of the master process.
         """
-        for child in self._CHILDREN_SPECS: 
+        for child in self._CHILDREN_SPECS:
             self.spawn_child(child)
 
     def kill_children(self, sig):
@@ -455,7 +455,7 @@ class BaseArbiter(object):
                     return
                 except (KeyError, OSError):
                     return
-            raise            
+            raise
 
 
 class Arbiter(BaseArbiter):
@@ -467,9 +467,9 @@ class Arbiter(BaseArbiter):
 
     def init_process(self):
         BaseArbiter.init_process(self)
-        util._setproctitle("arbiter [%s running %s children]" % (self.name,  
+        util._setproctitle("arbiter [%s running %s children]" % (self.name,
             self.num_children))
-        
+
     def manage_children(self):
         """Maintain the number of children by spawning or killing as
         required.
