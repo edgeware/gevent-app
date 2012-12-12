@@ -14,14 +14,10 @@
 
 """Logging utilities."""
 
-import logging
-import logging.handlers
-import sys
 import errno
-
-import multiprocessing, logging, sys, re, os, StringIO, threading, time, Queue
-from logging.handlers import RotatingFileHandler
-import multiprocessing, threading, logging, sys, traceback
+import logging
+import Queue
+import threading
 
 
 FORMAT_STRING = '%(asctime)s pid-%(process)-6d %(levelname)-6s [%(name)s] %(message)s'

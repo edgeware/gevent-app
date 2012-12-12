@@ -13,19 +13,19 @@
 # limitations under the License.
 
 import errno
-import gevent
-from gevent.queue import Queue, Empty
-from gevent.event import Event
 import logging
 from multiprocessing import Queue as LogQueue
 import os
-import select
+import random
 import signal
 import sys
 import time
 import tempfile
 import traceback
-import random
+
+import gevent
+from gevent.queue import Queue, Empty
+from gevent.event import Event
 
 from . import util
 from .log import LogConsumer, ChildLogHandler, StreamToLogger, init_log
@@ -204,25 +204,6 @@ class BaseArbiter(object):
                 'sys.stdout'), logging.INFO)
         sys.stderr = StreamToLogger(logging.getLogger(
                 'sys.stderr'), logging.ERROR)
-
-#    def init_log(self):
-#        """Initialize logging."""
-#        root = logging.getLogger()
-#
-#        for handler in root.handlers:
-#            root.removeHandler(handler)
-#            handler.close()
-#
-#        try:
-#            newhandler = (logging.StreamHandler() if not self.logfile
-#                          else logging.FileHandler(self.logfile))
-#            self.handler = newhandler
-#            self.handler.setFormatter(self.formatter)
-#            # We accept everything from our children.
-#            root.setLevel(logging.DEBUG)
-#            root.addHandler(self.handler)
-#        except Exception, e:
-#            logging.error('failed initializing logging: %s', e)
 
     def init_process(self):
         """Initialize the arbiter process."""
