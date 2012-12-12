@@ -28,6 +28,9 @@ FORMAT_STRING = '%(asctime)s pid-%(process)-6d %(levelname)-6s [%(name)s] %(mess
 DATE_FORMAT = "%Y-%m-%d %H:%M:%S%z"
 
 
+formatter = logging.Formatter(FORMAT_STRING, DATE_FORMAT)
+
+
 def patch_logging():
     """Patch the logging module so that it does not use threads."""
     logging.threading = None
@@ -35,22 +38,42 @@ def patch_logging():
     logging._lock = None
     logging.logThreads = False
 
- 
+
+def init_log(logfile):
+    """Initialize logging."""
+    root = logging.getLogger()
+
+    for handler in root.handlers:
+        root.removeHandler(handler)
+        handler.close()
+
+    try:
+        newhandler = (logging.StreamHandler() if not logfile
+                      else logging.FileHandler(logfile))
+        handler = newhandler
+        handler.setFormatter(formatter)
+        # We accept everything from our children.
+        root.setLevel(logging.DEBUG)
+        root.addHandler(handler)
+    except Exception, e:
+        logging.error('failed initializing logging: %s', e)
+
+
 class StreamToLogger(object):
     """Fake file-like stream object that redirects writes to a logger
     instance.
     """
-    
+
     def __init__(self, logger, log_level=logging.INFO):
         self.logger = logger
         self.log_level = log_level
         self.linebuf = ''
-        
+
     def write(self, buf):
         """Write data."""
         for line in buf.rstrip().splitlines():
             self.logger.log(self.log_level, line.rstrip())
- 
+
     def flush(self):
         """Flush the file."""
         # We do not buffer anything.
@@ -62,7 +85,7 @@ class ChildLogHandler(logging.Handler):
     def __init__(self, queue):
         logging.Handler.__init__(self)
         self.queue = queue
-        
+
     def send(self, s):
         self.queue.put_nowait(s)
 
@@ -100,7 +123,7 @@ class LogConsumer(threading.Thread):
         self.shutdown = False
         self.polltime = 1
         self.start()
-           
+
     def run(self):
         while (self.shutdown == False) or (self.queue.empty() == False):
             # so we block for a short period of time so that we can

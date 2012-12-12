@@ -28,7 +28,7 @@ import traceback
 import random
 
 from . import util
-from .log import LogConsumer, ChildLogHandler, StreamToLogger
+from .log import LogConsumer, ChildLogHandler, StreamToLogger, init_log
 
 
 FORMAT_STRING = '%(asctime)s [%(process)s] %(levelname)-6s [%(name)s] %(message)s'
@@ -205,31 +205,31 @@ class BaseArbiter(object):
         sys.stderr = StreamToLogger(logging.getLogger(
                 'sys.stderr'), logging.ERROR)
 
-    def init_log(self):
-        """Initialize logging."""
-        root = logging.getLogger()
-
-        for handler in root.handlers:
-            root.removeHandler(handler)
-            handler.close()
-
-        try:
-            newhandler = (logging.StreamHandler() if not self.logfile
-                          else logging.FileHandler(self.logfile))
-            self.handler = newhandler
-            self.handler.setFormatter(self.formatter)
-            # We accept everything from our children.
-            root.setLevel(logging.DEBUG)
-            root.addHandler(self.handler)
-        except Exception, e:
-            logging.error('failed initializing logging: %s', e)
+#    def init_log(self):
+#        """Initialize logging."""
+#        root = logging.getLogger()
+#
+#        for handler in root.handlers:
+#            root.removeHandler(handler)
+#            handler.close()
+#
+#        try:
+#            newhandler = (logging.StreamHandler() if not self.logfile
+#                          else logging.FileHandler(self.logfile))
+#            self.handler = newhandler
+#            self.handler.setFormatter(self.formatter)
+#            # We accept everything from our children.
+#            root.setLevel(logging.DEBUG)
+#            root.addHandler(self.handler)
+#        except Exception, e:
+#            logging.error('failed initializing logging: %s', e)
 
     def init_process(self):
         """Initialize the arbiter process."""
         util.set_owner_process(self.uid, self.gid)
         self.pid = os.getpid()
         self.init_signals()
-        self.init_log()
+        init_log(self.logfile)
         log.debug("Arbiter %s booted on %d", self.name, self.pid)
 
     def init_signals(self):

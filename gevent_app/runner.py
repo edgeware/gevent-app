@@ -19,6 +19,7 @@ import pwd
 
 from .arbiter import Arbiter
 from .daemon import daemonize, check_pidfile, remove_pidfile
+from .log import init_log
 
 
 def normalize_uid(uid):
@@ -75,11 +76,17 @@ def run(app, pidfile, logfile, name=None, no_daemon=False, uid=None,
     uid = normalize_uid(uid)
     gid = normalize_gid(gid)
 
+    # Init logging before bootstrap to allow logging there. Don't use
+    # logfile here since we don't want it to be owned by root.
+    # TODO: Handle this better so initial logging doesn't go to stdout
+    init_log(None)
+
     app.bootstrap()
 
     if not no_daemon:
         daemonize(pidfile)
 
+    # Logging will be re-inited in arbiter
     logfile = None if logfile == '-' else logfile
     arbiter = Arbiter(app, logfile=logfile, name=name, uid=uid,
                       gid=gid, num_children=num)
