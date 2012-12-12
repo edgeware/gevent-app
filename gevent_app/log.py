@@ -20,7 +20,7 @@ import Queue
 import threading
 
 
-FORMAT_STRING = '%(asctime)s pid-%(process)-6d %(levelname)-6s [%(name)s] %(message)s'
+FORMAT_STRING = '%(asctime)s [%(process)s] %(levelname)-6s [%(name)s] %(message)s'
 DATE_FORMAT = "%Y-%m-%d %H:%M:%S%z"
 
 

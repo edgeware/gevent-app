@@ -31,10 +31,6 @@ from . import util
 from .log import LogConsumer, ChildLogHandler, StreamToLogger, init_log
 
 
-FORMAT_STRING = '%(asctime)s [%(process)s] %(levelname)-6s [%(name)s] %(message)s'
-DATE_FORMAT = "%Y-%m-%d %H:%M:%S%z"
-
-
 log = logging.getLogger(__name__)
 
 
@@ -180,8 +176,6 @@ class BaseArbiter(object):
         (getattr(signal, name), name[3:].lower()) for name in dir(signal)
         if name[:3] == "SIG" and name[3] != "_"
     )
-
-    formatter = logging.Formatter(FORMAT_STRING, DATE_FORMAT)
 
     def __init__(self, app, name=None, logfile=None, timeout=30,
                  uid=None, gid=None):
