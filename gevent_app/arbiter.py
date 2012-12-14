@@ -271,7 +271,7 @@ class BaseArbiter(object):
 
         """
         log.info("Hang up: %s", self.name)
-        self.init_log()
+        init_log(self.logfile)
 
     def handle_quit(self):
         """Quit."""
