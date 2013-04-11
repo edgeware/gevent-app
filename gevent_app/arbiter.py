@@ -281,6 +281,10 @@ class BaseArbiter(object):
         """Interrupt."""
         raise StopIteration
 
+    def handle_cld(self):
+        """Child terminated."""
+        pass
+
     def handle_term(self):
         """Terminate."""
         self.stop(True)
