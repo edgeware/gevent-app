@@ -43,7 +43,7 @@ def check_pidfile(pidfile):
         with open(pidfile) as fp:
             pid = int(fp.read().strip())
         try:
-            os.kill(0, pid)
+            os.kill(pid, 0)
         except OSError:
             print "Removing stale pidfile."
             remove_pidfile(pidfile)
