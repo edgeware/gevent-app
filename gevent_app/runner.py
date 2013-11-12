@@ -94,4 +94,5 @@ def run(app, pidfile, logfile, name=None, no_daemon=False, uid=None,
     try:
         arbiter.run()
     finally:
-        remove_pidfile(pidfile)
+        if os.getppid() is 1:
+            remove_pidfile(pidfile)
