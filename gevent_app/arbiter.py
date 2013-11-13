@@ -355,8 +355,9 @@ class BaseArbiter(object):
                 # to avoid infinite start/stop cycles.
                 exitcode = status >> 8
                 if exitcode == self._WORKER_BOOT_ERROR:
-                    reason = "Worker failed to boot."
-                    raise HaltServer(reason, self._WORKER_BOOT_ERROR)
+                    log.warning("Worker failed to boot")
+                    gevent.sleep(5)
+                    break
 
                 child_info = self._CHILDREN.pop(wpid, None)
                 if not child_info:
