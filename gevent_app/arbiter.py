@@ -351,12 +351,12 @@ class BaseArbiter(object):
                 if not wpid:
                     break
 
-                # A worker said it cannot boot. We'll shutdown
-                # to avoid infinite start/stop cycles.
+                # A worker said it cannot boot. We break to let it retry.
+                # TODO: Verify that this is reasonable.
                 exitcode = status >> 8
                 if exitcode == self._WORKER_BOOT_ERROR:
                     log.warning("Worker failed to boot")
-                    gevent.sleep(5)
+                    gevent.sleep(10)
                     break
 
                 child_info = self._CHILDREN.pop(wpid, None)
